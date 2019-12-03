@@ -1,5 +1,9 @@
 var sql = require('./sql');
 
+function isNumber(n) {
+    return !isNaN(parseFloat(n)) && isFinite(n);
+}
+
 exports.index = function(req, res) {
 	res.send('<h1>Hello</h1>');
 };
@@ -10,7 +14,11 @@ exports.users = function(req, res) {
 	
     // If there's an ID passed along
     if (typeof(req.params.id) !== 'undefined') {
-        query = query.concat(' where id=' + req.params.id);
+        if (isNumber(req.params.id)) {
+            query = query.concat(' where id=' + req.params.id);
+        } else {
+            query = query.concat(' where Username=\'' + req.params.id + '\'');            
+        }
     }
 
 	// Invoke the query
