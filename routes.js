@@ -33,6 +33,34 @@ exports.users = function(req, res) {
 	});
 };
 
+exports.frontpage = function(req, res) {
+	res.send('<h1>Front Page</h1>');
+};
+
+exports.profilePage = function(req, res) {
+	res.send('<h1>Profile</h1>');
+};
+
+exports.postDetails = function(req, res) {
+	res.send('<h1>Post</h1>');
+};
+
+exports.statistics = function(req, res) {
+	res.send('<h1>Statistics - General</h1>');
+};
+
+exports.top10PostingUsers = function(req, res) {
+	res.send('<h1>Statistics - TOP 10 Posting users</h1>');
+};
+
+exports.userRegistrations = function(req, res) {
+	res.send('<h1>Statistics - User registrations by dates</h1>');
+};
+
+exports.genderDivision = function(req, res) {
+	res.send('<h1>Statistics - Gender Division</h1>');
+};
+
 exports.default = function(req, res) {
 	res.send('Invalid route');
 };
