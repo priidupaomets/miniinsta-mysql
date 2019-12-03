@@ -5,8 +5,14 @@ var routes = require('./routes');
 // Instatiate application instance
 var app = express();
 
+// Let's add a View Engine - Handlebars
+app.set('view engine', 'hbs');
+
 // Handle URL root 
 app.get('/', routes.index);
+
+// UI for the API
+app.get('/api', routes.apiIndex);
 
 // Application-specific routes
 // app.get('/api/users/:id([0-9]{1,9})?', routes.usersByID);

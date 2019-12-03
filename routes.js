@@ -8,6 +8,26 @@ exports.index = function(req, res) {
 	res.send('<h1>Hello</h1>');
 };
 
+exports.apiIndex = function(req, res) {
+    var vm = {                          // vm = View Model
+        title: 'API Functions',
+        api: [
+            { name: 'Users', url: '/api/users' },         
+            { name: 'User by ID', url: '/api/users/25' },         
+            { name: 'User by Username', url: '/api/users/cligerw' },         
+            { name: 'Front Page', url: '/api/frontpage' },
+            { name: 'Profile Page', url: '/api/profile/cbaccup3b' },
+            { name: 'Post', url: '/api/posts/19' },
+            { name: 'General Statistics', url: '/api/stats' },
+            { name: 'TOP 10 Posting Users', url: '/api/stats/top10/postingusers' },
+            { name: 'Registrations', url: '/api/stats/registrations' },
+            { name: 'Gender Division', url: '/api/stats/genderdivision' }
+	    ]
+    };
+    
+    res.render('api-index', vm);
+};
+
 exports.users = function(req, res) {
 	// Define SQL query
     var query = 'select * from User';
