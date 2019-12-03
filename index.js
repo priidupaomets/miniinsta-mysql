@@ -9,7 +9,7 @@ var app = express();
 app.get('/', routes.index);
 
 // Application-specific routes
-app.get('/api/users', routes.users);
+app.get('/api/users/:id?', routes.users);
 
 // Default response when no matching routes were found
 app.get('*', routes.default);
