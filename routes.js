@@ -8,6 +8,11 @@ exports.users = function(req, res) {
 	// Define SQL query
     var query = 'select * from User';
 	
+    // If there's an ID passed along
+    if (typeof(req.params.id) !== 'undefined') {
+        query = query.concat(' where id=' + req.params.id);
+    }
+
 	// Invoke the query
     sql.querySql(query, function(data) {
         if (data !== undefined) {
