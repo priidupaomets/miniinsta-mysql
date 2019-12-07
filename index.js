@@ -1,9 +1,13 @@
 // Module requires
 var express = require('express');
+var logger = require('morgan');
 var routes = require('./routes');
 
 // Instatiate application instance
 var app = express();
+
+// Configure logger middleware
+app.use(logger('dev'));
 
 // Let's add a View Engine - Handlebars
 app.set('view engine', 'hbs');
