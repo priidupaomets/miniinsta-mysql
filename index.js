@@ -2,13 +2,16 @@
 var express = require('express');
 var logger = require('morgan');
 var apicache = require('apicache');
+var redis = require('redis');
 var routes = require('./routes');
 
 // Instatiate application instance
 var app = express();
 
 // instantiate default API cache
-let cache = apicache.middleware;
+// let cache = apicache.middleware;
+// if redisClient option is defined, apicache will use redis client instead of built-in memory store
+let cache = apicache.options({ redisClient: redis.createClient(6379, '127.0.0.1', { no_ready_check: true }) }).middleware;
 
 // Configure logger middleware
 app.use(logger('dev'));
