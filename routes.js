@@ -67,11 +67,12 @@ exports.frontpage = function(req, res) {
 	// Define SQL query
     var query = 'SELECT DerivedTbl.PostID, Username, CreationTime,  ' +
 '     PostMedia.MediaTypeID, PostMedia.MediaFileUrl, ' +
-'     Likes ' +
+'     NumberOfLikes, ' +
+'     (SELECT COUNT(ID) FROM PostMedia AS Media WHERE DerivedTbl.PostID = Media.PostID) AS NumberOfMediaFiles ' +
 ' FROM ( ' +
 '  SELECT Post.ID AS PostID, User.Username, Post.LocationName, Post.Location, ' +
 '         Post.CreationTime, Min(PostMedia.ID) AS PostMediaID, ' +
-'         (SELECT Count(PostID) FROM Liking WHERE PostID = Post.ID) AS Likes ' +
+'         (SELECT Count(PostID) FROM Liking WHERE PostID = Post.ID) AS NumberOfLikes ' +
 '    FROM Post INNER JOIN ' +
 '         User ON Post.UserID = User.ID INNER JOIN ' +
 '         PostMedia ON Post.ID = PostMedia.PostID INNER JOIN ' +
@@ -113,12 +114,20 @@ exports.profilePage = function(req, res) {
 ' FROM User ' +
 ' WHERE ' + condition + '; ' +
 
-' SELECT Post.ID, LocationName, PostMedia.MediaTypeID, PostMedia.MediaFileUrl ' +
-' FROM Post INNER JOIN ' +
-'     User ON Post.UserID = User.ID LEFT OUTER JOIN ' +
-'     PostMedia ON Post.ID = PostMedia.PostID ' +
-' WHERE ' + condition + 
-' ORDER BY Post.CreationTime DESC;';
+' SELECT DerivedTbl.PostID, LocationName, Location, CreationTime, ' +
+'        PostMedia.MediaTypeID, PostMedia.MediaFileUrl, ' +
+'        (SELECT COUNT(ID) FROM PostMedia AS Media WHERE DerivedTbl.PostID = Media.PostID) AS NumberOfMediaFiles ' +
+'   FROM ( ' +
+' 	SELECT Post.ID AS PostID, Post.LocationName, Post.Location, ' +
+' 		   Post.CreationTime, Min(PostMedia.ID) AS PostMediaID ' +
+' 	  FROM Post INNER JOIN ' +
+' 		   User ON Post.UserID = User.ID LEFT OUTER JOIN ' +
+' 		   PostMedia ON Post.ID = PostMedia.PostID ' +
+'    WHERE ' + condition + 
+' 	 GROUP BY Post.ID, Post.LocationName, Post.Location, Post.CreationTime ' +
+'    ) DerivedTbl LEFT OUTER JOIN ' +
+'      PostMedia ON DerivedTbl.PostMediaID = PostMedia.ID ' +
+'  ORDER BY CreationTime DESC, DerivedTbl.PostID desc;';
 
 	// Invoke the query
     sql.querySql(query, function(data) {
@@ -130,6 +139,7 @@ exports.profilePage = function(req, res) {
             {
                 posts = data[1];
 
+                // Attach the 2nd MARS dataset to the profile as an array of Posts
                 if (posts !== undefined)
                     profile.Posts = posts;
                 else
@@ -219,7 +229,7 @@ exports.statistics = function(req, res) {
      // Invoke the query
      sql.querySql(query, function(data) {
          if (data !== undefined) {
-             res.send(data[0]);
+             res.send(data[0]); // Return only the first row
          }
      }, function(err) {
          console.log('ERROR: ' + err);
