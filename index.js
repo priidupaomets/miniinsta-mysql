@@ -9,9 +9,9 @@ var routes = require('./routes');
 var app = express();
 
 // instantiate default API cache
-// let cache = apicache.middleware;
+let cache = apicache.middleware;
 // if redisClient option is defined, apicache will use redis client instead of built-in memory store
-let cache = apicache.options({ redisClient: redis.createClient(6379, '127.0.0.1', { no_ready_check: true }) }).middleware;
+// let cache = apicache.options({ redisClient: redis.createClient(6379, '127.0.0.1', { no_ready_check: true }) }).middleware;
 
 // Configure logger middleware
 app.use(logger('dev'));
@@ -29,6 +29,7 @@ app.get('/api', routes.apiIndex);
 // app.get('/api/users/:id([0-9]{1,9})?', routes.usersByID);
 // app.get('/api/users/:username?', routes.usersByUsername);
 app.get('/api/users/:id?', cache('10 seconds'), routes.users);
+app.get('/api/users_insecure/:id?', routes.usersInsecure);
 
 app.get('/api/frontpage', cache('10 seconds'), routes.frontpage);
 app.get('/api/profile/:id', cache('10 seconds'), routes.profilePage);

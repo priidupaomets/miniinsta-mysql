@@ -26,6 +26,22 @@ exports.querySql = function(query, onData, onError) {
     }
 };
 
+exports.querySqlWithParams = function(query, values, onData, onError) {
+    try {
+        pool
+            .query(query, values, function (error, results, fields) {
+                if (error) 
+                    onError(error);
+
+                onData(results);
+              });
+    } catch (err) {
+        // Log errors
+        if (onError !== undefined)
+            onError(err);
+    }
+};
+
 // pool.on('error', err => {
 //     console.log('Error with MSSQL: ' + err);
 // });

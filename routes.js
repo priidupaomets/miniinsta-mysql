@@ -12,9 +12,10 @@ exports.apiIndex = function(req, res) {
     var vm = {                          // vm = View Model
         title: 'API Functions',
         api: [
-            { name: 'Users', url: '/api/users' },         
+            { name: 'Users', url: '/api/users?pagesize=20&page=2' },         
             { name: 'User by ID', url: '/api/users/25' },         
             { name: 'User by Username', url: '/api/users/cligerw' },         
+            { name: 'User by Username (Insecure)', url: '/api/users_insecure/cbaccup3b' },         
             { name: 'Front Page', url: '/api/frontpage' },
             { name: 'Profile Page', url: '/api/profile/cbaccup3b' },
             { name: 'Post', url: '/api/posts/19' },
@@ -22,13 +23,19 @@ exports.apiIndex = function(req, res) {
             { name: 'TOP 10 Posting Users', url: '/api/stats/top10/postingusers' },
             { name: 'Registrations', url: '/api/stats/registrations' },
             { name: 'Gender Division', url: '/api/stats/genderdivision' }
-	    ]
+	    ],
+        injections: [
+            { name: 'Basic test (Insecure)', url: '/api/users_insecure/blaah\'%20or%201=1%20--%20'},
+            { name: 'Basic test (Secure)', url: '/api/users/blaah\'%20or%201=1%20--%20'},
+            { name: 'Alternate Query (Insecure)', url: '/api/users_insecure/blaah\'%20or%201=0;%20select%20*%20from%20MediaType%20--%20'},
+            { name: 'Alternate Query (Secure)', url: '/api/users/blaah\'%20or%201=0;%20select%20*%20from%20MediaType%20--%20'},
+        ]
     };
     
     res.render('api-index', vm);
 };
 
-exports.users = function(req, res) {
+exports.usersInsecure = function(req, res) {
 	// Define SQL query
     var query = 'select * from User';
 	
@@ -43,6 +50,32 @@ exports.users = function(req, res) {
 
 	// Invoke the query
     sql.querySql(query, function(data) {
+        if (data !== undefined) {
+            // console.log('DATA rows affected: ' + data.length);
+
+            res.send(data);
+        }
+    }, function(err) {
+        console.log('ERROR: ' + err);
+        res.status(500).send('ERROR: ' + err);
+	});
+};
+
+exports.users = function(req, res) {
+	// Define SQL query
+    var query = 'select * from User';
+	
+    // If there's an ID passed along
+    if (typeof(req.params.id) !== 'undefined') {
+        if (isNumber(req.params.id)) {
+            query = query.concat(' where id=?');
+        } else {
+            query = query.concat(' where Username=?');            
+        }
+    }
+
+	// Invoke the query
+    sql.querySqlWithParams(query, [req.params.id], function(data) {
         if (data !== undefined) {
             // console.log('DATA rows affected: ' + data.length);
 
@@ -65,28 +98,30 @@ exports.frontpage = function(req, res) {
     let userId = 19;
 
 	// Define SQL query
-    var query = 'SELECT DerivedTbl.PostID, Username, CreationTime,  ' +
-'     PostMedia.MediaTypeID, PostMedia.MediaFileUrl, ' +
-'     NumberOfLikes, ' +
-'     (SELECT COUNT(ID) FROM PostMedia AS Media WHERE DerivedTbl.PostID = Media.PostID) AS NumberOfMediaFiles ' +
-' FROM ( ' +
-'  SELECT Post.ID AS PostID, User.Username, Post.LocationName, Post.Location, ' +
-'         Post.CreationTime, Min(PostMedia.ID) AS PostMediaID, ' +
-'         (SELECT Count(PostID) FROM Liking WHERE PostID = Post.ID) AS NumberOfLikes ' +
-'    FROM Post INNER JOIN ' +
-'         User ON Post.UserID = User.ID INNER JOIN ' +
-'         PostMedia ON Post.ID = PostMedia.PostID INNER JOIN ' +
-'         Following ON User.ID = Following.FolloweeUserID ' +
-'   WHERE Following.FollowerUserID =  ' + userId +
-'   GROUP BY Post.ID, User.Username, Post.CreationTime ' +
-' ) DerivedTbl INNER JOIN ' +
-'   PostMedia ON DerivedTbl.PostMediaID = PostMedia.ID ' +
-' ORDER BY CreationTime DESC, DerivedTbl.PostID';
-	
+//     var query = 'SELECT DerivedTbl.PostID, Username, CreationTime,  ' +
+// '     PostMedia.MediaTypeID, PostMedia.MediaFileUrl, ' +
+// '     NumberOfLikes, ' +
+// '     (SELECT COUNT(ID) FROM PostMedia AS Media WHERE DerivedTbl.PostID = Media.PostID) AS NumberOfMediaFiles ' +
+// ' FROM ( ' +
+// '  SELECT Post.ID AS PostID, User.Username, Post.LocationName, Post.Location, ' +
+// '         Post.CreationTime, Min(PostMedia.ID) AS PostMediaID, ' +
+// '         (SELECT Count(PostID) FROM Liking WHERE PostID = Post.ID) AS NumberOfLikes ' +
+// '    FROM Post INNER JOIN ' +
+// '         User ON Post.UserID = User.ID INNER JOIN ' +
+// '         PostMedia ON Post.ID = PostMedia.PostID INNER JOIN ' +
+// '         Following ON User.ID = Following.FolloweeUserID ' +
+// '   WHERE Following.FollowerUserID =  ' + userId +
+// '   GROUP BY Post.ID, User.Username, Post.CreationTime ' +
+// ' ) DerivedTbl INNER JOIN ' +
+// '   PostMedia ON DerivedTbl.PostMediaID = PostMedia.ID ' +
+// ' ORDER BY CreationTime DESC, DerivedTbl.PostID';
+    
+    let query = "CALL GetFrontPageData (?)";
+
 	// Invoke the query
-    sql.querySql(query, function(data) {
+    sql.querySqlWithParams(query, [userId], function(data) {
         if (data !== undefined) {
-            res.send(data);
+            res.send(data); // In case of stored procedure, the returned data has different structure
         }
     }, function(err) {
         console.log('ERROR: ' + err);
