@@ -1,5 +1,6 @@
 // Module requires
 var express = require('express');
+var path = require('path');
 var logger = require('morgan');
 var apicache = require('apicache');
 var redis = require('redis');
@@ -18,6 +19,9 @@ app.use(logger('dev'));
 
 // Let's add a View Engine - Handlebars
 app.set('view engine', 'hbs');
+
+// Initialize public folder as a location for static files
+app.use(express.static(path.join(__dirname, 'public')));
 
 // Handle URL root 
 app.get('/', routes.index);
