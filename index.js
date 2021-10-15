@@ -1,13 +1,13 @@
 // Module requires
-var express = require('express');
-var path = require('path');
-var logger = require('morgan');
-var apicache = require('apicache');
-var redis = require('redis');
-var routes = require('./routes');
+let express = require('express');
+let path = require('path');
+let logger = require('morgan');
+let apicache = require('apicache');
+let redis = require('redis');
+let routes = require('./routes');
 
 // Instatiate application instance
-var app = express();
+let app = express();
 
 // instantiate default API cache
 let cache = apicache.middleware;
@@ -47,6 +47,6 @@ app.get('/api/stats/genderdivision', cache('10 seconds'), routes.genderDivision)
 app.get('*', routes.default);
 
 // Initialize the server
-var server = app.listen(3000, function() {
+let server = app.listen(3000, function() {
     console.log('Listening on port 3000');
 });

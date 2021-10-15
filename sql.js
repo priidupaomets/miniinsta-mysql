@@ -1,13 +1,13 @@
-var mysql = require('mysql');
+let mysql = require('mysql');
 // Full details on MySQL module: https://github.com/mysqljs/mysql or https://www.npmjs.com/package/mysql
 
 var pool  = mysql.createPool({
     connectionLimit : 10,
-    host            : 'localhost',  // anysql.itcollege.ee
+    host            : 'localhost',  
     user            : 'testapp',
     password        : 'testApp123',
     database        : 'miniinsta',
-    multipleStatements: true  // for being able to issue MARS commands (multiple queries)
+    multipleStatements: true  // MARS päringute tegemiseks
   });
 
 exports.querySql = function(query, onData, onError) {
